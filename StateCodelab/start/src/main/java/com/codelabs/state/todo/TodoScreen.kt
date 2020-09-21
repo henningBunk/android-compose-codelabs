@@ -16,6 +16,7 @@
 
 package com.codelabs.state.todo
 
+import android.view.Surface
 import androidx.compose.foundation.Icon
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.clickable
@@ -27,11 +28,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumnFor
 import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.ui.tooling.preview.Preview
+import com.codelabs.state.ui.StateCodelabTheme
 import com.codelabs.state.util.generateRandomTodoItem
 import kotlin.random.Random
 
@@ -98,18 +103,26 @@ private fun randomTint(): Float {
 @Preview
 @Composable
 fun PreviewTodoScreen() {
-    val items = listOf(
-        TodoItem("Learn compose", TodoIcon.Event),
-        TodoItem("Take the codelab"),
-        TodoItem("Apply state", TodoIcon.Done),
-        TodoItem("Build dynamic UIs", TodoIcon.Square)
-    )
-    TodoScreen(items, {}, {})
+    StateCodelabTheme {
+        Surface(color = MaterialTheme.colors.surface) {
+            val items = listOf(
+                TodoItem("Learn compose", TodoIcon.Event),
+                TodoItem("Take the codelab"),
+                TodoItem("Apply state", TodoIcon.Done),
+                TodoItem("Build dynamic UIs", TodoIcon.Square)
+            )
+            TodoScreen(items, {}, {})
+        }
+    }
 }
 
 @Preview
 @Composable
 fun PreviewTodoRow() {
-    val todo = remember { generateRandomTodoItem() }
-    TodoRow(todo = todo, onItemClicked = {}, modifier = Modifier.fillMaxWidth())
+    StateCodelabTheme {
+        Surface(color = MaterialTheme.colors.surface) {
+            val todo = remember { generateRandomTodoItem() }
+            TodoRow(todo = todo, onItemClicked = {}, modifier = Modifier.fillMaxWidth())
+        }
+    }
 }
