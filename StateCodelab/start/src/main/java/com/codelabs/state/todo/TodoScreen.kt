@@ -30,6 +30,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.ui.tooling.preview.Preview
 import com.codelabs.state.ui.StateCodelabTheme
@@ -45,30 +46,56 @@ import kotlin.random.Random
  */
 @Composable
 fun TodoScreen(
-        items: List<TodoItem>,
-        onAddItem: (TodoItem) -> Unit,
-        onRemoveItem: (TodoItem) -> Unit
+    items: List<TodoItem>,
+    currentlyEditing: TodoItem?,
+    onAddItem: (TodoItem) -> Unit,
+    onRemoveItem: (TodoItem) -> Unit,
+    onStartEdit: (TodoItem) -> Unit,
+    onEditItemChange: (TodoItem) -> Unit,
+    onEditDone: () -> Unit,
 ) {
     Column {
+        val enableTopSection = currentlyEditing == null
         TodoItemInputBackground(elevate = true, modifier = Modifier.fillMaxWidth()) {
-            TodoItemEntryInput(onItemComplete = onAddItem)
+            if (enableTopSection) {
+                TodoItemEntryInput(onItemComplete = onAddItem)
+            } else {
+                Text(
+                    "Editing item",
+                    style = MaterialTheme.typography.h6,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(16.dp)
+                        .fillMaxWidth()
+                )
+            }
         }
         LazyColumnFor(
-                items = items,
-                modifier = Modifier.weight(1f),
-                contentPadding = PaddingValues(top = 8.dp)
+            items = items,
+            modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(top = 8.dp)
         ) { todo ->
-            TodoRow(
+            if (currentlyEditing?.id == todo.id) {
+                TodoItemInlineEditor(
+                    item = currentlyEditing,
+                    onEditItemChange = onEditItemChange,
+                    onEditDone = onEditDone,
+                    onRemoveItem = { onRemoveItem(todo) }
+                )
+            } else {
+                TodoRow(
                     todo = todo,
-                    onItemClicked = { onRemoveItem(it) },
-                    modifier = Modifier.fillParentMaxWidth()
-            )
+                    onItemClicked = { onStartEdit(it) },
+                    Modifier.fillParentMaxWidth()
+                )
+            }
         }
 
         // For quick testing, a random item generator button
         Button(
-                onClick = { onAddItem(generateRandomTodoItem()) },
-                modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            onClick = { onAddItem(generateRandomTodoItem()) },
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
         ) {
             Text("Add random item")
         }
@@ -76,9 +103,24 @@ fun TodoScreen(
 }
 
 @Composable
+fun TodoItemInlineEditor(
+    item: TodoItem,
+    onEditItemChange: (TodoItem) -> Unit,
+    onEditDone: () -> Unit,
+    onRemoveItem: (TodoItem) -> Unit
+) = TodoItemInput(
+    text = item.task,
+    onSetText = { onEditItemChange(item.copy(task = it)) },
+    icon = item.icon,
+    onSetIcon = { onEditItemChange(item.copy(icon = it)) },
+    submit = onEditDone,
+    iconsVisible = true
+)
+
+@Composable
 fun TodoItemEntryInput(onItemComplete: (TodoItem) -> Unit) {
     val (text, setText) = remember { mutableStateOf("") }
-    val (icon, setIcon) = remember { mutableStateOf(TodoIcon.Default)}
+    val (icon, setIcon) = remember { mutableStateOf(TodoIcon.Default) }
     val iconsVisible = text.isNotBlank()
 
     val submit = {
@@ -144,16 +186,16 @@ fun TodoItemInput(
  */
 @Composable
 fun TodoRow(
-        todo: TodoItem,
-        onItemClicked: (TodoItem) -> Unit,
-        modifier: Modifier = Modifier,
-        iconAlpha: Float = remember(todo.id) { randomTint() }
+    todo: TodoItem,
+    onItemClicked: (TodoItem) -> Unit,
+    modifier: Modifier = Modifier,
+    iconAlpha: Float = remember(todo.id) { randomTint() }
 ) {
     Row(
-            modifier = modifier
-                    .clickable { onItemClicked(todo) }
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+        modifier = modifier
+            .clickable { onItemClicked(todo) }
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(todo.task)
         Icon(todo.icon.vectorAsset, tint = contentColor().copy(alpha = iconAlpha))
@@ -170,12 +212,12 @@ fun PreviewTodoScreen() {
     StateCodelabTheme {
         Surface(color = MaterialTheme.colors.surface) {
             val items = listOf(
-                    TodoItem("Learn compose", TodoIcon.Event),
-                    TodoItem("Take the codelab"),
-                    TodoItem("Apply state", TodoIcon.Done),
-                    TodoItem("Build dynamic UIs", TodoIcon.Square)
+                TodoItem("Learn compose", TodoIcon.Event),
+                TodoItem("Take the codelab"),
+                TodoItem("Apply state", TodoIcon.Done),
+                TodoItem("Build dynamic UIs", TodoIcon.Square)
             )
-            TodoScreen(items, {}, {})
+            TodoScreen(items, null, {}, {}, {}, {}, {})
         }
     }
 }
