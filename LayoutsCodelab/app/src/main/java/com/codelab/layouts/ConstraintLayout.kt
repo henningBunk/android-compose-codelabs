@@ -1,4 +1,4 @@
-package com.codelab.layouts.ui
+package com.codelab.layouts
 
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.ConstraintLayout
@@ -13,6 +13,7 @@ import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.ui.tooling.preview.Preview
+import com.codelab.layouts.ui.LayoutsCodelabTheme
 
 @Composable
 fun ConstraintLayoutContent() {
