@@ -16,31 +16,14 @@
 
 package com.codelab.theming.ui.start
 
-import androidx.compose.foundation.Icon
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.ScrollableColumn
-import androidx.compose.foundation.Text
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.preferredHeight
-import androidx.compose.foundation.layout.preferredHeightIn
-import androidx.compose.material.Card
-import androidx.compose.material.Divider
-import androidx.compose.material.ListItem
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.TopAppBar
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
@@ -53,10 +36,10 @@ import com.codelab.theming.data.PostRepo
 import com.codelab.theming.ui.start.theme.JetnewsTheme
 
 @Composable
-fun Home() {
+fun Home(darktheme: Boolean = false) {
     val featured = remember { PostRepo.getFeaturedPost() }
     val posts = remember { PostRepo.getPosts() }
-    JetnewsTheme {
+    JetnewsTheme(darkTheme = darktheme) {
         Scaffold(
             topBar = { AppBar() }
         ) { innerPadding ->
@@ -85,7 +68,7 @@ private fun AppBar() {
         title = {
             Text(text = stringResource(R.string.app_title))
         },
-        backgroundColor = MaterialTheme.colors.primary
+        backgroundColor = MaterialTheme.colors.primarySurface
     )
 }
 
@@ -94,13 +77,18 @@ fun Header(
     text: String,
     modifier: Modifier = Modifier
 ) {
-    Text(
-        text = text,
+    Surface(
+        color = MaterialTheme.colors.onSurface.copy(alpha = 0.1f),
+        contentColor = MaterialTheme.colors.primary,
         modifier = modifier
-            .fillMaxWidth()
-            .background(Color.LightGray)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-    )
+    ) {
+        Text(
+            text = text,
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+    }
 }
 
 @Composable
@@ -124,15 +112,19 @@ fun FeaturedPost(
             Spacer(Modifier.preferredHeight(16.dp))
 
             val padding = Modifier.padding(horizontal = 16.dp)
-            Text(
-                text = post.title,
-                modifier = padding
-            )
-            Text(
-                text = post.metadata.author.name,
-                modifier = padding
-            )
-            PostMetadata(post, padding)
+            ProvideEmphasis(EmphasisAmbient.current.high) {
+                Text(
+                    text = post.title,
+                    modifier = padding
+                )
+                Text(
+                    text = post.metadata.author.name,
+                    modifier = padding
+                )
+            }
+            ProvideEmphasis(emphasis = EmphasisAmbient.current.medium) {
+                PostMetadata(post, padding)
+            }
             Spacer(Modifier.preferredHeight(16.dp))
         }
     }
@@ -206,7 +198,7 @@ private fun FeaturedPostPreview() {
 @Composable
 private fun FeaturedPostarkThemePreview() {
     val post = remember { PostRepo.getFeaturedPost() }
-    JetnewsTheme(darkTheme = true){
+    JetnewsTheme(darkTheme = true) {
         FeaturedPost(post = post)
     }
 }
@@ -216,4 +208,10 @@ private fun FeaturedPostarkThemePreview() {
 @Composable
 private fun HomePreview() {
     Home()
+}
+
+@Preview("Home Dark Theme")
+@Composable
+private fun HomeDarkThemePreview() {
+    Home(true)
 }
